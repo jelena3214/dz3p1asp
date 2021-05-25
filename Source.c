@@ -15,37 +15,61 @@ struct node* createNode(int info) {
 	return newnode;
 }
 
-struct node* createLinkedList() {
-	struct node* head = malloc(sizeof(struct node));
-
-}
+struct linkedList {
+	struct node* head;
+}LINKEDLIST;
 
 struct graph {
-	int* nodes;
-	int* branches;
+	int numofNodes;
+	struct linkedList* adjList;
 }GRAPH;
 
-struct graphNode {
-	int info;
-	int* branches;
-}GRAPHNODE;
+struct graph* createGraph(int size) {
+	struct graph* mainGraph = (struct graph*)malloc(sizeof(struct graph));
+	mainGraph->numofNodes = size;
+	mainGraph->adjList = (struct linkedList*)malloc(size * sizeof(struct linkedList)); //lista ulancanih listi
 
+	for (int i = 0; i < size; i++) {
+		mainGraph->adjList[i].head = NULL; //sve liste na pocetku su prazne
+	}
 
-int** initNodes(int **nodes, int size) {
-	nodes = realloc(nodes, sizeof(int*) * size);
-	return nodes;
+	return mainGraph;
+}
+
+void printGraph(struct graph* graph)
+{
+	for (int i = 0; i < graph->numofNodes; i++) {
+		struct node* p = graph->adjList[i].head;
+		printf("cvor br = %d\n", i);
+		while (p != NULL) {
+			printf("-> %d", p->info);
+			p = p->next;
+		}
+		putchar('\n');
+	}
+}
+
+void addBranch(struct graph* mainGraph, int from, int to) {
+	struct node* newnode = createNode(to);
+	newnode->next = mainGraph->adjList[from].head;
+	mainGraph->adjList[from].head = newnode;
 }
 
 int main() {
 	int graphSize;
 	scanf("%d", &graphSize);
-	int** nodes = NULL;
+	
+	struct graph* tryit = createGraph(graphSize);
+	addBranch(tryit, 1, 2);
+	addBranch(tryit, 2, 3);
+	addBranch(tryit, 3, 5);
+	addBranch(tryit, 4, 2);
+	addBranch(tryit, 4, 3);
+	addBranch(tryit, 4, 5);
+	addBranch(tryit, 5, 6);
 
-	struct graph *mainGraph = (struct graph*)malloc(sizeof(struct graph));
-	initNodes(nodes, graphSize);
-	mainGraph->nodes = nodes;
-	mainGraph->branches = NULL;
-
+	printGraph(tryit);
+	 
 
 	
 	return 0;
