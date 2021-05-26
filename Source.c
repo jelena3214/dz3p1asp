@@ -163,22 +163,85 @@ void deleteGraph(struct graph* maingraph, int *arr) {
 }
 
 int main() {
+	int choice, num, i;
 	int graphSize;
+	printf("Unesite broj cvorova grafa :  ");
 	scanf("%d", &graphSize);
 	int* inGraph = calloc(graphSize, sizeof(int));
 	struct graph* tryit = createGraph(graphSize);
-	//printGraph(tryit);
-	addBranch(tryit, 1, 2);
-	addBranch(tryit, 2, 3);
-	addBranch(tryit, 3, 5);
-	addBranch(tryit, 4, 2);
-	addBranch(tryit, 4, 1);
-	addBranch(tryit, 4, 5);
-	addBranch(tryit, 5, 2);
-	for (int i = 0; i < graphSize; i++) {
-		tryit = removeGraphNode(tryit, inGraph, i, 0);
+	//struct graph* tryit = NULL;
+	//int* inGraph = NULL;
+
+	while (1)
+	{
+		printf("1. Dodaj nov cvor u graf\n");
+		printf("2. Izbrisi cvor iz grafa\n");
+		printf("3. Dodaj granu izmedju dva cvora\n");
+		printf("4. Ukloni granu izmedju dva cvora\n");
+		printf("5. Ispisi graf\n");
+		printf("6. Izbrisi graf\n");
+		printf("7. Kraj programa\n");
+		printf("Unesite opciju :  ");
+		scanf("%d", &choice);
+
+	
+		if (choice == 1) {
+			addGraphNode(tryit, inGraph);
+		}
+		if (choice == 2) {
+			int remove;
+			printf("Unesite cvor koji zelite za izbrisete iz grafa: ");
+			scanf("%d", &remove);
+			if (inGraph[remove] == 1 || remove > tryit->numofNodes || remove < 0) {
+				printf("Nije moguce obrisati taj cvor\n");
+				continue;
+			}
+			for (int i = 0; i < tryit->numofNodes; i++) {
+				tryit = removeGraphNode(tryit, inGraph, i, remove);
+			}
+		}
+		if (choice == 3) {
+			int from, to;
+			printf("Unesite cvor OD kog polazi grana: ");
+			scanf("%d", &from);
+			if ((inGraph[from] == 1) || (from > tryit->numofNodes) || (from < 0)) {
+				printf("Nije moguce dodati granu\n");
+				continue;
+			}
+			printf("Unesite cvor DO kog polazi grana: ");
+			scanf("%d", &to);
+			if (inGraph[to] == 1 || to > tryit->numofNodes || to < 0) {
+				printf("Nije moguce dodati granu\n");
+				continue;
+			}
+			addBranch(tryit, from, to);
+		}
+		if (choice == 4) {
+			int from, to;
+			printf("Unesite cvor OD kog polazi grana: ");
+			scanf("%d", &from);
+			if (inGraph[from] == 1 || from > tryit->numofNodes || from < 0 || tryit->adjList[from].head == NULL) {
+				printf("Nije moguce obrisati granu\n");
+				continue;
+			}
+			printf("Unesite cvor DO kog polazi grana: ");
+			scanf("%d", &to);
+			if (inGraph[to] == 1 || to > tryit->numofNodes || to < 0) {
+				printf("Nije moguce obrisati granu\n");
+				continue;
+			}
+			removeBranch(tryit, from, to);
+		}
+		if (choice == 5) {
+			printGraph(tryit, inGraph);
+		}
+		if (choice == 6) {
+			deleteGraph(tryit, inGraph);
+		}
+		if (choice == 7) {
+			exit(0);
+		}
 	}
-	printGraph(tryit, inGraph);
-	deleteGraph(tryit, inGraph);
+	
 	return 0;
 }
