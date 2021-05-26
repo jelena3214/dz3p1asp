@@ -51,10 +51,33 @@ void printGraph(struct graph* graph, int *arrBool)
 
 void addBranch(struct graph* mainGraph, int from, int to) {
 	struct node* newnode = createNode(to);
-	newnode->next = mainGraph->adjList[from].head;
-	mainGraph->adjList[from].head = newnode;
+	if (mainGraph->adjList[from].head == NULL) {
+		newnode->next = mainGraph->adjList[from].head;
+		mainGraph->adjList[from].head = newnode;
+	}
+	else {
+		struct node* curr = mainGraph->adjList[from].head;
+		struct node* prev = NULL;
+		while (curr != NULL && curr->info < to) {
+			prev = curr;
+			curr = curr->next;
+		}
+		if (prev == NULL) {//prvo
+			newnode->next = curr;
+			mainGraph->adjList[from].head = newnode;
+			return mainGraph;
+		}
+		if (curr == NULL) {//poslednje
+			prev->next = newnode;
+			newnode->next = NULL;
+			return mainGraph;
+		}
+		prev->next = newnode;
+		newnode->next = curr;
+	}
+	return mainGraph;
 }
-//sortiranje lista?
+
 
 void freeGraphNode(struct node* remove) {
 	free(remove);
@@ -91,16 +114,52 @@ void addGraphNode(struct graph* maingraph, int *arr) {
 	arr = realloc(arr, sizeof(int) * (n + 1));
 	arr[n] = 0;
 }
-
+//remove ide je indeks u listi zaglavlja, a info je cvor koji svuda brisemo(uklanjamo ga iz grafa)
 struct graph* removeGraphNode(struct graph* mainGraph,int *arrBool, int remove, int info) {
 	struct node* curr = mainGraph->adjList[remove].head;
+	if (curr == NULL && remove != info)return mainGraph;
+	if (remove == info) {
+		arrBool[info] = 1;
+		return mainGraph;
+	}
 	while (curr->info != info) {
 		if (curr->next == NULL)return mainGraph;
 		curr = curr->next;
 	}
 	removeNode(mainGraph, &curr, remove);
-	arrBool[remove] = 1;
+	arrBool[info] = 1;
 	return mainGraph;
+}
+//ako taj cvor nema grana 
+void removeBranch(struct graph* mainGraph, int from, int to) {
+	struct node* curr = mainGraph->adjList[from].head;
+	struct node* prev = NULL;
+	while (curr->info != to) {
+		prev = curr;
+		curr = curr->next;
+	}
+	if (curr == mainGraph->adjList[from].head) {//prvi el
+		mainGraph->adjList[from].head = curr->next;
+		freeGraphNode(curr);
+	}
+	else {//bilo gde
+		prev->next = curr->next;
+		freeGraphNode(curr);
+	}
+}
+
+void deleteGraph(struct graph* maingraph, int *arr) {
+	int n = maingraph->numofNodes;
+	for (int i = 0; i < n; i++) {
+		if (arr[i] != 0) {
+			while (maingraph->adjList[i].head != NULL) {
+				maingraph->adjList[i].head = maingraph->adjList[i].head->next;
+				freeGraphNode(maingraph->adjList[i].head);
+			}
+		}
+	}
+	free(maingraph->adjList);
+	free(maingraph);
 }
 
 int main() {
@@ -113,15 +172,13 @@ int main() {
 	addBranch(tryit, 2, 3);
 	addBranch(tryit, 3, 5);
 	addBranch(tryit, 4, 2);
-	addBranch(tryit, 4, 3);
+	addBranch(tryit, 4, 1);
 	addBranch(tryit, 4, 5);
 	addBranch(tryit, 5, 2);
-	removeGraphNode(tryit, inGraph, 3, 5);
-	addGraphNode(tryit, inGraph);
-	addBranch(tryit, 6, 5);
-	
-	addGraphNode(tryit, inGraph);
-	removeGraphNode(tryit, inGraph, 6, 5);
+	for (int i = 0; i < graphSize; i++) {
+		tryit = removeGraphNode(tryit, inGraph, i, 0);
+	}
 	printGraph(tryit, inGraph);
+	deleteGraph(tryit, inGraph);
 	return 0;
 }
